@@ -160,6 +160,9 @@
       color: var(--faint);
       margin-bottom: 0.5rem;
     }
+    .hero-label.hero-follow {
+      margin-top: 1rem;
+    }
 
     .ip-row {
       display: flex;
@@ -377,10 +380,14 @@
 
     <div class="err" id="err" role="alert"></div>
 
-    <section class="hero" aria-labelledby="ip-label">
+    <section class="hero" aria-labelledby="ip-label as-org-label">
       <div class="hero-label" id="ip-label">Public IP</div>
       <div class="ip-row">
         <div class="ip-value loading" id="ip-display"><span class="skel">&nbsp;</span></div>
+      </div>
+      <div class="hero-label hero-follow" id="as-org-label">AS organization</div>
+      <div class="ip-row">
+        <div class="ip-value loading" id="as-org-display"><span class="skel">&nbsp;</span></div>
       </div>
       <div class="actions">
         <button type="button" class="primary" id="btn-copy" disabled>Copy address</button>
@@ -455,6 +462,7 @@
       ];
 
       var ipEl = document.getElementById("ip-display");
+      var asOrgEl = document.getElementById("as-org-display");
       var locBody = document.getElementById("loc-body");
       var hdrTable = document.querySelector("#hdr-table tbody");
       var hdrCount = document.getElementById("hdr-count");
@@ -539,6 +547,8 @@
         setError("");
         ipEl.classList.add("loading");
         ipEl.innerHTML = '<span class="skel">&nbsp;</span>';
+        asOrgEl.classList.add("loading");
+        asOrgEl.innerHTML = '<span class="skel">&nbsp;</span>';
         btnCopy.disabled = true;
         locBody.innerHTML = '<p class="empty-loc">Loading…</p>';
         hdrTable.innerHTML = "";
@@ -555,6 +565,7 @@
         var dl = document.createElement("dl");
         dl.className = "grid";
         keys.forEach(function (k) {
+          if (k === "asOrganization") return;
           var dt = document.createElement("dt");
           dt.textContent = LABELS[k] || k;
           var dd = document.createElement("dd");
@@ -562,6 +573,11 @@
           dl.appendChild(dt);
           dl.appendChild(dd);
         });
+        if (!dl.children.length) {
+          locBody.innerHTML =
+            '<p class="empty-loc">No edge geo on this request. Deploy on Cloudflare to populate <code>request.cf</code> metadata (country, city, colo, TLS, …).</p>';
+          return;
+        }
         locBody.innerHTML = "";
         locBody.appendChild(dl);
       }
@@ -594,6 +610,12 @@
             ipEl.classList.remove("loading");
             ipEl.textContent = data.ip || "unknown";
             btnCopy.disabled = !data.ip || data.ip === "unknown";
+            asOrgEl.classList.remove("loading");
+            var org =
+              data.location && data.location.asOrganization != null
+                ? String(data.location.asOrganization).trim()
+                : "";
+            asOrgEl.textContent = org || "—";
             renderLocation(data.location);
             hdrTable.innerHTML = "";
             renderHeaders(data.headers || {});
@@ -602,6 +624,8 @@
           .catch(function (e) {
             ipEl.classList.remove("loading");
             ipEl.textContent = "—";
+            asOrgEl.classList.remove("loading");
+            asOrgEl.textContent = "—";
             btnCopy.disabled = true;
             locBody.innerHTML =
               '<p class="empty-loc">Could not load trace data.</p>';
