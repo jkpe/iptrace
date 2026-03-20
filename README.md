@@ -1,6 +1,6 @@
 # iptrace
 
-Single-page app on **[Cloudflare Workers](https://developers.cloudflare.com/workers/)** showing your **public IP**, **edge / geo metadata** from `request.cf`, and **all inbound request headers**.
+Single-page app on **[Cloudflare Workers](https://developers.cloudflare.com/workers/)** showing your **public IP**, **edge metadata** from `request.cf` (geo, ASN, colo, HTTP/TLS, TCP RTT, optional TLS fingerprint fields when Cloudflare provides them), and **all inbound request headers**.
 
 ## Run locally
 

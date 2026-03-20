@@ -33,26 +33,56 @@ function isIncomingCf(cf: CfProperties | undefined): cf is IncomingRequestCfProp
   return !!cf && "colo" in cf && "httpProtocol" in cf;
 }
 
+/** Documented on `request.cf` but not always present in `@cloudflare/workers-types`. */
+const CF_TLS_FINGERPRINT_KEYS = [
+  "tlsClientRandom",
+  "tlsClientHelloLength",
+  "tlsClientExtensionsSha1",
+  "tlsClientExtensionsSha1Le",
+  "tlsClientCiphersSha1",
+] as const;
+
+function cfOptionalStrings(
+  cf: IncomingRequestCfProperties,
+  keys: readonly string[],
+): Record<string, string> {
+  const raw = cf as Record<string, unknown>;
+  const out: Record<string, string> = {};
+  for (const k of keys) {
+    const v = raw[k];
+    if (typeof v === "string" && v !== "") out[k] = v;
+  }
+  return out;
+}
+
 function buildLocation(cf: CfProperties | undefined): Record<string, string | number> | null {
   if (!isIncomingCf(cf)) return null;
-  const geo = pickDefined({
-    colo: cf.colo,
-    country: cf.country,
-    city: cf.city,
-    region: cf.region,
-    regionCode: cf.regionCode,
-    postalCode: cf.postalCode,
-    timezone: cf.timezone,
-    latitude: cf.latitude,
-    longitude: cf.longitude,
-    continent: cf.continent,
-    metroCode: cf.metroCode,
-    isEUCountry: cf.isEUCountry,
-    asn: cf.asn,
-    asOrganization: cf.asOrganization,
-    httpProtocol: cf.httpProtocol,
-    tlsVersion: cf.tlsVersion,
-  });
+  const geo = {
+    ...pickDefined({
+      colo: cf.colo,
+      country: cf.country,
+      city: cf.city,
+      region: cf.region,
+      regionCode: cf.regionCode,
+      postalCode: cf.postalCode,
+      timezone: cf.timezone,
+      latitude: cf.latitude,
+      longitude: cf.longitude,
+      continent: cf.continent,
+      metroCode: cf.metroCode,
+      isEUCountry: cf.isEUCountry,
+      asn: cf.asn,
+      asOrganization: cf.asOrganization,
+      httpProtocol: cf.httpProtocol,
+      tlsVersion: cf.tlsVersion,
+      tlsCipher: cf.tlsCipher,
+      clientAcceptEncoding: cf.clientAcceptEncoding,
+      clientTcpRtt: cf.clientTcpRtt,
+      edgeRequestKeepAliveStatus: cf.edgeRequestKeepAliveStatus,
+      requestPriority: cf.requestPriority,
+    }),
+    ...cfOptionalStrings(cf, CF_TLS_FINGERPRINT_KEYS),
+  };
   return Object.keys(geo).length ? geo : null;
 }
 

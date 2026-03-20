@@ -431,12 +431,27 @@
         asOrganization: "AS organization",
         httpProtocol: "HTTP",
         tlsVersion: "TLS",
+        tlsCipher: "TLS cipher",
+        clientAcceptEncoding: "Original Accept-Encoding",
+        clientTcpRtt: "TCP RTT (ms)",
+        edgeRequestKeepAliveStatus: "Edge keepalive status",
+        requestPriority: "HTTP priority",
+        tlsClientRandom: "TLS client random",
+        tlsClientHelloLength: "TLS ClientHello length",
+        tlsClientExtensionsSha1: "TLS client extensions (SHA-1, BE)",
+        tlsClientExtensionsSha1Le: "TLS client extensions (SHA-1, LE)",
+        tlsClientCiphersSha1: "TLS client ciphers (SHA-1)",
       };
 
       var ORDER = [
         "country", "city", "region", "regionCode", "timezone", "continent",
         "postalCode", "latitude", "longitude", "colo",
-        "asn", "asOrganization", "httpProtocol", "tlsVersion", "metroCode", "isEUCountry",
+        "asn", "asOrganization", "httpProtocol", "tlsVersion", "tlsCipher",
+        "clientTcpRtt", "edgeRequestKeepAliveStatus", "requestPriority",
+        "clientAcceptEncoding",
+        "tlsClientRandom", "tlsClientHelloLength", "tlsClientCiphersSha1",
+        "tlsClientExtensionsSha1", "tlsClientExtensionsSha1Le",
+        "metroCode", "isEUCountry",
       ];
 
       var ipEl = document.getElementById("ip-display");
