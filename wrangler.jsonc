@@ -3,6 +3,31 @@
   "name": "iptrace",
   "main": "src/index.ts",
   "compatibility_date": "2026-03-20",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "logpush": false,
+  "preview_urls": false,
+  "workers_dev": false,
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    }
+  },
+  "routes": [
+    {
+      "pattern": "iptrace.top",
+      "custom_domain": true
+    },
+  ],
   "rules": [
     {
       "type": "Text",
