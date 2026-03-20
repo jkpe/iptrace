@@ -105,19 +105,55 @@ function json(data: TracePayload, init: ResponseInit = {}): Response {
   });
 }
 
+function buildTracePayload(request: Request): TracePayload {
+  return {
+    ip: getClientIp(request),
+    location: buildLocation(request.cf),
+    headers: headersObject(request),
+  };
+}
+
+function tracePlainText(payload: TracePayload): string {
+  const lines: string[] = [];
+  lines.push(`ip: ${payload.ip}`);
+  lines.push("");
+  if (payload.location && Object.keys(payload.location).length > 0) {
+    lines.push("location:");
+    for (const [k, v] of Object.entries(payload.location)) {
+      lines.push(`  ${k}: ${v}`);
+    }
+  } else {
+    lines.push("location: (none)");
+  }
+  lines.push("");
+  lines.push("headers:");
+  for (const [k, v] of Object.entries(payload.headers)) {
+    lines.push(`  ${k}: ${v}`);
+  }
+  return lines.join("\n");
+}
+
+/** True when Accept lists text/html (typical browsers). Plain curl uses wildcard accept only. */
+function wantsHtml(request: Request): boolean {
+  const accept = request.headers.get("Accept") ?? "";
+  return accept.includes("text/html");
+}
+
+function normalizePathname(pathname: string): string {
+  if (pathname !== "/" && pathname.endsWith("/")) return pathname.slice(0, -1) || "/";
+  return pathname;
+}
+
 export default {
   fetch(request: Request): Response {
     const url = new URL(request.url);
+    const path = normalizePathname(url.pathname);
 
-    if (url.pathname === "/api") {
+    if (path === "/api" || path === "/json") {
       if (request.method !== "GET" && request.method !== "HEAD") {
         return new Response("Method Not Allowed", { status: 405 });
       }
-      const payload: TracePayload = {
-        ip: getClientIp(request),
-        location: buildLocation(request.cf),
-        headers: headersObject(request),
-      };
+      const payload = buildTracePayload(request);
       if (request.method === "HEAD") {
         return new Response(null, {
           status: 200,
@@ -128,6 +164,30 @@ export default {
     }
 
     if (request.method === "GET" || request.method === "HEAD") {
+      if (path === "/") {
+        const payload = buildTracePayload(request);
+        if (wantsHtml(request)) {
+          return new Response(request.method === "HEAD" ? null : shellHtml, {
+            headers: {
+              "content-type": "text/html; charset=utf-8",
+              "cache-control": "no-store",
+            },
+          });
+        }
+        if (request.method === "HEAD") {
+          return new Response(null, {
+            status: 200,
+            headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+          });
+        }
+        return new Response(tracePlainText(payload), {
+          headers: {
+            "content-type": "text/plain; charset=utf-8",
+            "cache-control": "no-store",
+          },
+        });
+      }
+
       return new Response(request.method === "HEAD" ? null : shellHtml, {
         headers: {
           "content-type": "text/html; charset=utf-8",
