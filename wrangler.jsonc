@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "iptrace",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-12-01",
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.html"],
+      "fallthrough": true
+    }
+  ]
+}
