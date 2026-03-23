@@ -388,6 +388,16 @@
       color: var(--faint);
       text-align: center;
     }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    footer .footer-meta {
+      margin-top: 0.65rem;
+    }
   </style>
 </head>
 <body>
@@ -437,7 +447,8 @@
     </details>
 
     <footer>
-      Headers and geo reflect this request to Cloudflare Workers · <code style="font-size:0.85em">GET /api</code> for JSON
+      <div>Made by <a href="https://www.jackpearce.co.uk/" rel="noopener noreferrer">Jack Pearce</a> ♥ · <a href="https://github.com/jkpe/iptrace" rel="noopener noreferrer">Open source on GitHub</a></div>
+      <div class="footer-meta">Headers and geo reflect this request to Cloudflare Workers · <code style="font-size:0.85em">GET /api</code> for JSON</div>
     </footer>
   </div>
 
