@@ -1,5 +1,9 @@
 import shellHtml from "./shell.html";
 
+interface Env {
+  ASSETS: Fetcher;
+}
+
 export interface TracePayload {
   ip: string;
   location: Record<string, string | number | undefined> | null;
@@ -145,7 +149,7 @@ function normalizePathname(pathname: string): string {
 }
 
 export default {
-  fetch(request: Request): Response {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = normalizePathname(url.pathname);
 
@@ -186,6 +190,11 @@ export default {
             "cache-control": "no-store",
           },
         });
+      }
+
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (assetResponse.status !== 404) {
+        return assetResponse;
       }
 
       return new Response(request.method === "HEAD" ? null : shellHtml, {
